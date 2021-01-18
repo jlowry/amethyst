@@ -1,4 +1,5 @@
-use crate::prefab::Prefab;
+use std::{collections::HashMap, io::Read};
+
 use atelier_assets::{
     core::AssetUuid,
     importer::{self as atelier_importer, ImportOp, ImportedAsset, Importer, ImporterValue},
@@ -7,8 +8,9 @@ use fnv::FnvHashSet;
 use legion_prefab::ComponentRegistration;
 use prefab_format::ComponentTypeUuid;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, io::Read};
 use type_uuid::TypeUuid;
+
+use crate::prefab::Prefab;
 
 #[derive(Default, Deserialize, Serialize, TypeUuid, Clone, Copy)]
 #[uuid = "80583980-24d4-4034-8394-ea749b43f55d"]
@@ -85,10 +87,10 @@ impl Importer for PrefabImporter {
         let raw_prefab = prefab_deser.prefab();
 
         let prefab_asset = Prefab {
-            raw_prefab,
+            raw: raw_prefab,
             dependencies: None,
-            prefab: None,
             dependers: FnvHashSet::default(),
+            cooked: None,
             version: 0,
         };
 
@@ -123,7 +125,7 @@ impl Importer for PrefabImporter {
         // }
 
         // Add the ID to the .meta
-        let prefab_id = prefab_asset.raw_prefab.prefab_id();
+        let prefab_id = prefab_asset.raw.prefab_id();
         state.id = Some(AssetUuid(prefab_id));
 
         //{

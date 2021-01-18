@@ -1,11 +1,10 @@
+use std::collections::{HashMap, HashSet};
+
+use amethyst_core::ecs::{query, world::EntityHasher, Entity, IntoQuery, Resources, World};
+
 use crate::{
     prefab::{ComponentRegistry, Prefab},
     AssetStorage, Handle,
-};
-use amethyst_core::ecs::{query, world::EntityHasher, Entity, IntoQuery, Resources, World};
-use std::{
-    collections::{HashMap, HashSet},
-    iter::FromIterator,
 };
 
 struct PrefabInstance {
@@ -34,7 +33,7 @@ pub fn prefab_spawning_tick(world: &mut World, resources: &mut Resources) {
     prefab_handle_query.for_each_mut(world, |(entity, handle, instance)| {
         if let Some(prefab) = prefab_storage.get(handle) {
             if instance.version < prefab.version {
-                if let Some(cooked_prefab) = prefab.prefab.as_ref() {
+                if let Some(cooked_prefab) = prefab.cooked.as_ref() {
                     if instance.entity_map.is_empty() {
                         if let Some((root_entity,)) = entity_query.iter(&cooked_prefab.world).next()
                         {
