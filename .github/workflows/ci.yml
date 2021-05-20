@@ -63,9 +63,23 @@ jobs:
         run: rm -rf ./target/debug/deps/libamethyst*
         if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
 
-      - run: cargo test --workspace --all-features --all-targets
+      - uses: actions/cache@v2
+        id: cargo-fetch
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/cache
+            ~/.cargo/registry/index
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - run: cargo test --workspace --all-features --doc
+      - name: Cargo fetch
+        if: steps.cargo-fetch.outputs.cache-hit != 'true'
+        run: cargo fetch
+
+      - run: cargo --offline test --workspace --all-features --all-targets
+
+      - run: cargo --offline test --workspace --all-features --doc
         continue-on-error: true
 
       - uses: peaceiris/actions-mdbook@v1
